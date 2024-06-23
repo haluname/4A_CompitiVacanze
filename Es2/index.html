@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+  </head>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap");
+
+    * {
+      font-family: "Montserrat", sans-serif; 
+    }
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 70vh;
+    }
+  </style>
+  <body>
+    <div class="container">
+      <h1>Welcome to our fantastic chat</h1>
+      <login-component></login-component>
+      <!-- Componente di login -->
+    </div>
+
+    <script src="client/components/login.js" type="module"></script>
+    <!-- Script per il componente di login -->
+  </body>
+</html>
