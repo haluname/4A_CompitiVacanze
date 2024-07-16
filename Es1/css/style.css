@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+header, footer {
+    background-color: #333;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    padding: 1em 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.imgImpiccato {
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.sezioneIndovina {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.caselleParola {
+    display: flex;
+    gap: 0.5em;
+    font-size: 1.5em;
+}
+
+.indovinaParola {
+    margin: 1em 0;
+    padding: 0.5em;
+    font-size: 1em;
+}
+
+.inviaParola {
+    padding: 0.5em 1em;
+    font-size: 1em;
+}
+
+.linkInserisciParole {
+    margin-top: 2em;
+}
+
+.linkInserisciParole a {
+    color: #007BFF;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+.linkInserisciParole a:hover {
+    text-decoration: underline;
+}
