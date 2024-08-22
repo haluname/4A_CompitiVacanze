@@ -1,10 +1,9 @@
 const template = `
     <style>
-        /* Stili per il login-component */
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap');
 
-        *{
-            font-family: 'Montserrat', sans-serif; /* Applica Montserrat come font principale */
+        * {
+            font-family: 'Montserrat', sans-serif;
         }
         
         #loginComponent {
@@ -17,17 +16,17 @@ const template = `
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         
-        #loginComponent h2 {
+        h2 {
             text-align: center;
             color: #333;
         }
-        
-        #loginForm {
+
+        form {
             margin-top: 20px;
         }
         
-        #loginForm input[type="text"],
-        #loginForm input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -36,7 +35,7 @@ const template = `
             box-sizing: border-box;
         }
         
-        #loginForm button {
+        button {
             width: 100%;
             padding: 10px;
             background-color: #007bff;
@@ -47,11 +46,11 @@ const template = `
             transition: background-color 0.3s ease;
         }
         
-        #loginForm button:hover {
+        button:hover {
             background-color: #0056b3;
         }
         
-        #loginForm button:active {
+        button:active {
             background-color: #004799;
         }
         
@@ -64,21 +63,34 @@ const template = `
             color: #007bff;
             text-decoration: none;
             font-weight: bold;
+            cursor: pointer;
         }
         
         p a:hover {
             text-decoration: underline;
         }
+
+        #registerForm {
+            display: none; /* Nasconde il modulo di registrazione per default */
+        }
     </style>
     
     <div id="loginComponent">
-        <h2>Login</h2>
+        <h2 id="formTitle">Login</h2>
+        
         <form id="loginForm">
             <input type="text" id="username" placeholder="Username" required>
             <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
-        <p>Not registered? <a href="register.html">Create an account</a></p>
+
+        <form id="registerForm">
+            <input type="text" id="regUsername" placeholder="Username" required>
+            <input type="password" id="regPassword" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+
+        <p id="toggleForm">Not registered? <a id="toggleLink">Create an account</a></p>
     </div>
 `;
 
@@ -89,12 +101,83 @@ class LoginComponent extends HTMLElement {
         const shadowRoot = this.attachShadow({ mode: 'open' });
         shadowRoot.innerHTML = template;
 
-        shadowRoot.querySelector('#loginForm').addEventListener('submit', async (event) => {
+        const loginForm = shadowRoot.querySelector('#loginForm');
+        const registerForm = shadowRoot.querySelector('#registerForm');
+        const toggleLink = shadowRoot.querySelector('#toggleLink');
+        const formTitle = shadowRoot.querySelector('#formTitle');
+        const toggleFormText = shadowRoot.querySelector('#toggleForm');
+
+        // Funzione per passare tra login e registrazione
+        toggleLink.addEventListener('click', () => {
+            if (loginForm.style.display !== "none") {
+                loginForm.style.display = "none";
+                registerForm.style.display = "block";
+                formTitle.textContent = "Register";
+                toggleFormText.innerHTML = `Already have an account? <a id="toggleLink">Login</a>`;
+            } else {
+                loginForm.style.display = "block";
+                registerForm.style.display = "none";
+                formTitle.textContent = "Login";
+                toggleFormText.innerHTML = `Not registered? <a id="toggleLink">Create an account</a>`;
+            }
+        });
+
+        // Gestione del form di login
+        loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const username = shadowRoot.querySelector('#username').value;
             const password = shadowRoot.querySelector('#password').value;
             
-            console.log(username, password);
+            const data = {
+                username: username,
+                password: password
+            };
+            let response = await fetch("server/validation.php", {
+                method: "POST",
+                headers: {"Content-Type" : "application/json"},
+                body: JSON.stringify(data),
+            });
+
+            let responseData = await response.json();
+
+            console.log(responseData);
+            if (responseData.success) {
+                alert("Login Done!");
+                sessionStorage.setItem("idUser", responseData.id);
+                window.location.href = "client/chat.html";
+            } else {
+                alert("Login failed. Please check your username and password.");
+            }
+        });
+
+        // Gestione del form di registrazione
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = shadowRoot.querySelector('#regUsername').value;
+            const password = shadowRoot.querySelector('#regPassword').value;
+            
+            const data = {
+                username: username,
+                password: password
+            };
+            let response = await fetch("server/register.php", {
+                method: "POST",
+                headers: {"Content-Type" : "application/json"},
+                body: JSON.stringify(data),
+            });
+
+            let responseData = await response.json();
+
+            console.log(responseData);
+            if (responseData.success) {
+                alert("Registration Done! You can now log in.");
+                loginForm.style.display = "block";
+                registerForm.style.display = "none";
+                formTitle.textContent = "Login";
+                toggleFormText.innerHTML = `Not registered? <a id="toggleLink">Create an account</a>`;
+            } else {
+                alert("Registration failed. Please try again.");
+            }
         });
     }
 }

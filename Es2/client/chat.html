@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap");
+
+        * {
+            font-family: "Montserrat", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .users-list {
+            width: 30%;
+            background-color: #f0f0f0;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-area {
+            width: 70%;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .chat-input {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+
+        #logout {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            width: 100px;
+            cursor: pointer;
+        }
+
+        #logout:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="users-list" id="usersList">
+
+        </div>
+        <button id="logout">Logout</button>
+
+
+        <div class="chat-area">
+            <div id="messagesContainer">
+
+            </div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button id="sendMessageButton">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="components/userComponent.js"></script>
+    <script type="module" src="components/messageComponent.js"></script>
+
+    <script>
+        const currentUserId = sessionStorage.getItem('idUser');
+
+        async function loadUsers() {
+            const response = await fetch(`../server/getUsers.php?idUser=${currentUserId}`);
+            const users = await response.json();
+
+            console.log(users);
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+
+            users.forEach(user => {
+                if (user.id != currentUserId) {
+                    const userElement = document.createElement('user-component');
+                    userElement.setAttribute('user-id', user.id);
+                    userElement.setAttribute('user-name', user.name);
+                    usersList.appendChild(userElement);
+
+                    userElement.addEventListener('click', () => {
+                        loadMessages(user.id);
+                    });
+                }
+            });
+        }
+
+        // Carica i messaggi di un utente
+        async function loadMessages(otherUserId) {
+            sessionStorage.setItem("otherUserId", otherUserId);
+            const response = await fetch(`../server/getMessages.php?userId=${currentUserId}&otherUserId=${otherUserId}`);
+            const messages = await response.json();
+            console.log(messages)
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = '';
+
+            messages.forEach(message => {
+                const messageElement = document.createElement('message-component');
+                messageElement.setAttribute('sender-id', message.sender_id);
+                messageElement.setAttribute('content', message.content);
+                messageElement.setAttribute('timestamp', message.timestamp);
+                messagesContainer.appendChild(messageElement);
+            });
+        }
+
+        // Inviio del nuovo messaggio
+        document.getElementById('sendMessageButton').addEventListener('click', async () => {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value;
+            const activeUser = sessionStorage.getItem("otherUserId");
+
+            if (messageText && activeUser) {
+                const data = {
+                    receiver_id: activeUser,
+                    sender_id: currentUserId,
+                    content: messageText
+                };
+                const response = await fetch('../server/sendMessage.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                let elaboration = await response.json();
+                console.log(elaboration)
+
+                if (elaboration.success) {
+                    loadMessages(activeUser);
+                    messageInput.value = '';
+                }
+                else {
+                    console.log(elaboration)
+                }
+            }
+        });
+
+        loadUsers();
+
+        document.getElementById('logout').addEventListener('click', () => {
+            sessionStorage.removeItem('idUser');
+            sessionStorage.removeItem('otherUserId');
+
+            window.location.href = '../index.html';
+        });
+    </script>
+</body>
+
+</html>

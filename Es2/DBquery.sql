@@ -16,11 +16,19 @@ CREATE TABLE messaggi (
   FOREIGN KEY (receiver_id) REFERENCES utenti(id)
 );
 
+INSERT INTO utenti (username, password) VALUES
+('John', 'john007'),
+('Jane', 'janethedream'),
+('Mike', 'mk47'),
+('Sarah', 'sahara123'),
+('David', 'davidovich0');
+
 INSERT INTO messaggi (sender_id, receiver_id, content) VALUES
 (1, 2, 'Ciao Jane, come stai oggi?'),
 (2, 1, 'Ciao John! Sto bene grazie, e tu?'),
 (1, 2, 'Tutto bene, grazie! Hai visto il film nuovo in uscita?'),
 (2, 1, 'Sì, l\'ho visto! È stato incredibile!');
+
 
 INSERT INTO messaggi (sender_id, receiver_id, content) VALUES
 (3, 4, 'Ciao Sarah, stasera hai dei piani?'),
